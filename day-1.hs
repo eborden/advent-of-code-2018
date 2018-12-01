@@ -1,8 +1,11 @@
 #!/usr/bin/env stack
--- stack --resolver lts-12.20 script --package hspec-expectations
+-- stack --resolver lts-12.20 script --package hspec-expectations --package containers
 {-# LANGUAGE LambdaCase #-}
 import           Data.Bifunctor          (bimap)
-import           Test.Hspec.Expectations
+import           Data.IntMap             (IntMap)
+import qualified Data.IntMap             as Map
+import           Data.Monoid             (First (First, getFirst))
+import           Test.Hspec.Expectations (Expectation, shouldBe)
 
 main :: IO ()
 main = do
@@ -10,6 +13,31 @@ main = do
   "+1, +1, +1" `shouldEvalTo`  3
   "+1, +1, -2" `shouldEvalTo`  0
   "-1, -2, -3" `shouldEvalTo` (-6)
+  print $ eval $ parseDisplay input
+  findDup "+1, -1" `shouldBe` Just 0
+  findDup "+3, +3, +4, -2, -4" `shouldBe` Just 10
+  findDup "-6, +3, +8, +5, -6" `shouldBe` Just 5
+  findDup "+7, +7, -2, -7, -4" `shouldBe` Just 14
+  print $ findDup input
+
+findDup :: String -> Maybe Int
+findDup = getFirst . go (Map.singleton 0 1) 0 . cycle . parseDisplay
+  where
+    go :: IntMap Int -> Int -> [Change] -> First Int
+    go bloom acc [] = First Nothing
+    go bloom acc (x:xs) = case x of
+      Add i ->
+        let j = i + acc
+        in stayOrGo j bloom <> go (Map.alter add1 j bloom) j xs
+      Subtract i ->
+        let j = acc - i
+        in stayOrGo j bloom <> go (Map.alter add1 j bloom) j xs
+      Unexpected _ -> go bloom acc xs
+    add1 = Just . maybe 1 (+1)
+    stayOrGo :: Int -> IntMap Int -> First Int
+    stayOrGo i bloom
+      | Map.findWithDefault 0 i bloom == 1 = First $ Just i
+      | otherwise = First Nothing
 
 data Change
   = Add Int
