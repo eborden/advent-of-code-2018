@@ -27,14 +27,11 @@ findDup = getFirst . go (Map.singleton 0 1) 0 . cycle . parseDisplay
   where
     go bloom acc [] = First Nothing
     go bloom acc (x:xs) = case x of
-      Add i ->
-        let j = i + acc
-        in stayOrGo j bloom <> go (Map.alter add1 j bloom) j xs
-      Subtract i ->
-        let j = acc - i
-        in stayOrGo j bloom <> go (Map.alter add1 j bloom) j xs
+      Add i        -> accumulate (acc + i) bloom xs
+      Subtract i   -> accumulate (acc - i) bloom xs
       Unexpected _ -> go bloom acc xs
-    add1 = Just . maybe 1 (+1)
+    accumulate i bloom xs = stayOrGo i bloom <> go (add1 i bloom) i xs
+    add1 = Map.alter (Just . maybe 1 (+1))
     stayOrGo i bloom
       | Map.findWithDefault 0 i bloom == 1 = First $ Just i
       | otherwise = First Nothing
