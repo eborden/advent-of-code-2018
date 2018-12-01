@@ -21,11 +21,12 @@ shouldEvalTo str i =
   eval (parseDisplay str) `shouldBe` i
 
 eval :: [Change] -> Int
-eval = \case
-  [] -> 0
-  Add i:rest -> i + eval rest
-  Subtract i:rest -> eval rest - i
-  Unexpected _:rest -> eval rest
+eval = foldr go 0
+ where
+  go = \case
+    Add i -> (i +)
+    Subtract i -> subtract i
+    Unexpected _ -> id
 
 parseDisplay :: String -> [Change]
 parseDisplay = \case
