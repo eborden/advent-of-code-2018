@@ -14,12 +14,12 @@ main = do
   "+1, +1, +1" `shouldEvalTo`  3
   "+1, +1, -2" `shouldEvalTo`  0
   "-1, -2, -3" `shouldEvalTo` (-6)
-  input <- intercalate "," . lines <$> getContents
-  print . eval $ parseDisplay input
   findDup "+1, -1" `shouldBe` Just 0
   findDup "+3, +3, +4, -2, -4" `shouldBe` Just 10
   findDup "-6, +3, +8, +5, -6" `shouldBe` Just 5
   findDup "+7, +7, -2, -7, -4" `shouldBe` Just 14
+  input <- intercalate "," . lines <$> getContents
+  print . eval $ parseDisplay input
   print $ findDup input
 
 findDup :: String -> Maybe Int
