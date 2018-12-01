@@ -25,7 +25,6 @@ main = do
 findDup :: String -> Maybe Int
 findDup = getFirst . go (Map.singleton 0 1) 0 . cycle . parseDisplay
   where
-    go :: IntMap Int -> Int -> [Change] -> First Int
     go bloom acc [] = First Nothing
     go bloom acc (x:xs) = case x of
       Add i ->
@@ -36,7 +35,6 @@ findDup = getFirst . go (Map.singleton 0 1) 0 . cycle . parseDisplay
         in stayOrGo j bloom <> go (Map.alter add1 j bloom) j xs
       Unexpected _ -> go bloom acc xs
     add1 = Just . maybe 1 (+1)
-    stayOrGo :: Int -> IntMap Int -> First Int
     stayOrGo i bloom
       | Map.findWithDefault 0 i bloom == 1 = First $ Just i
       | otherwise = First Nothing
