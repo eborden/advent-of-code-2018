@@ -4,6 +4,7 @@
 import           Data.Bifunctor          (bimap)
 import           Data.IntMap             (IntMap)
 import qualified Data.IntMap             as Map
+import           Data.List               (intercalate)
 import           Data.Monoid             (First (First, getFirst))
 import           Test.Hspec.Expectations (Expectation, shouldBe)
 
@@ -13,7 +14,8 @@ main = do
   "+1, +1, +1" `shouldEvalTo`  3
   "+1, +1, -2" `shouldEvalTo`  0
   "-1, -2, -3" `shouldEvalTo` (-6)
-  print $ eval $ parseDisplay input
+  input <- intercalate "," . lines <$> getContents
+  print . eval $ parseDisplay input
   findDup "+1, -1" `shouldBe` Just 0
   findDup "+3, +3, +4, -2, -4" `shouldBe` Just 10
   findDup "-6, +3, +8, +5, -6" `shouldBe` Just 5
